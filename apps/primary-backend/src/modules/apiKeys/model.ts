@@ -1,6 +1,7 @@
 import { t } from "elysia";
 
 export namespace ApiKeyModel {
+  // Create Schema
   export const createApiKeySchema = t.Object({
     name: t.String(),
   });
@@ -19,16 +20,25 @@ export namespace ApiKeyModel {
   export type createApiKeySchema = typeof createApiKeySchema.static;
   export type createApiKeyResponse = typeof createApiKeyResponse.static;
 
-  export const disableApiKeySchema = t.Object({
+  // Update Schema
+  export const updateApiKeySchema = t.Object({
     id: t.String(),
+    disabled: t.Boolean(),
   });
 
-  export const disableApiKeyResponse = t.Object({
-    message: t.Literal("Disabled API Key Successfully"),
+  export const updateApiKeyResponse = t.Object({
+    message: t.Literal("API Key disabled status updated"),
+  });
+  export const updateApiKeyFailedResponse = t.Object({
+    message: t.Literal("Failed to update API Key status"),
   });
 
-  export type disableApiKeySchema = typeof disableApiKeySchema.static;
-  export type disableApiKeyResponse = typeof disableApiKeyResponse.static;
+  export type updateApiKeySchema = typeof updateApiKeySchema.static;
+  export type updateApiKeyResponse = typeof updateApiKeyResponse.static;
+  export type updateApiKeyFailedResponse =
+    typeof updateApiKeyFailedResponse.static;
+
+  // Get API Key Schema
 
   export const getApiKeyResponseSchema = t.Object({
     apiKeys: t.Array(
@@ -36,6 +46,7 @@ export namespace ApiKeyModel {
         id: t.String(),
         name: t.String(),
         apiKey: t.String(),
+        disabled: t.Boolean(),
         creditsConsumed: t.Number(),
         lastUsed: t.Nullable(t.Date()),
       }),
@@ -43,6 +54,8 @@ export namespace ApiKeyModel {
   });
 
   export type getApiKeyResponseSchema = typeof getApiKeyResponseSchema.static;
+
+  // Delete API Key Schema
 
   export const deleteApiKeySchema = t.Object({
     id: t.String(),
@@ -52,6 +65,12 @@ export namespace ApiKeyModel {
     message: t.Literal("Deleted API Key Successfully"),
   });
 
-  export type deleteApiKeySchema = typeof disableApiKeySchema.static;
-  export type deleteApiKeyResponse = typeof disableApiKeyResponse.static;
+  export const deleteApiKeyFailedResponse = t.Object({
+    message: t.Literal("Failed in API Key Deletion"),
+  });
+
+  export type deleteApiKeySchema = typeof deleteApiKeySchema.static;
+  export type deleteApiKeyResponse = typeof deleteApiKeyResponse.static;
+  export type deleteApiKeyFailedResponse =
+    typeof deleteApiKeyFailedResponse.static;
 }

@@ -26,16 +26,20 @@ export const apiKey = new Elysia({ prefix: "/api-keys" })
       userId: decoded.userId,
     };
   })
-  .get("/", async ({ userId }) => {
-    const apiKeys = await ApiKeyService.getApiKeys(userId as string);
-    return {
-        apiKeys: apiKeys
-    };
-  }, {
-    response: {
-        200: ApiKeyModel.getApiKeyResponseSchema
-    }
-  })
+  .get(
+    "/",
+    async ({ userId }) => {
+      const apiKeys = await ApiKeyService.getApiKeys(userId as string);
+      return {
+        apiKeys: apiKeys,
+      };
+    },
+    {
+      response: {
+        200: ApiKeyModel.getApiKeyResponseSchema,
+      },
+    },
+  )
   .post(
     "/",
     async ({ body, userId, status }) => {
@@ -67,5 +71,51 @@ export const apiKey = new Elysia({ prefix: "/api-keys" })
       },
     },
   )
-  .post("/disable", async () => {})
-  .delete("/", async () => {});
+  .put(
+    "/",
+    async ({ userId, body, status }) => {
+      try {
+        await ApiKeyService.updateApiKey(
+          body.id,
+          String(userId),
+          body.disabled,
+        );
+        return status(200, {
+          message: "API Key disabled status updated",
+        });
+      } catch (error) {
+        return status(411, {
+          message: "Failed to update API Key status",
+        });
+      }
+    },
+    {
+      body: ApiKeyModel.updateApiKeySchema,
+      response: {
+        200: ApiKeyModel.updateApiKeyResponse,
+        411: ApiKeyModel.updateApiKeyFailedResponse,
+      },
+    },
+  )
+  .delete(
+    "/:id",
+    async ({ params, userId, status }) => {
+      try {
+        await ApiKeyService.delete(String(userId), params.id);
+        return status(200, {
+          message: "Deleted API Key Successfully",
+        });
+      } catch (error) {
+        console.log("Error in deleting api key: ", error);
+        return status(411, {
+          message: "Failed in API Key Deletion",
+        });
+      }
+    },
+    {
+      response: {
+        200: ApiKeyModel.deleteApiKeyResponse,
+        411: ApiKeyModel.deleteApiKeyFailedResponse,
+      },
+    },
+  );

@@ -42,14 +42,52 @@ export abstract class ApiKeyService {
     const apiKeys = await prisma.apiKey.findMany({
       where: {
         userId,
+        deleted: false,
       },
     });
     return apiKeys.map((apiKey) => ({
       id: apiKey.id,
       name: apiKey.name,
       apiKey: apiKey.apiKey,
+      disabled: apiKey.disabled,
       creditsConsumed: apiKey.creditsConsumed,
       lastUsed: apiKey.lastUsed,
     }));
+  }
+
+  static async updateApiKey(id: string, userId: string, disabled: boolean) {
+    await prisma.apiKey.update({
+      where: {
+        id,
+        userId,
+      },
+      data: {
+        disabled,
+      },
+    });
+  }
+
+  static async enableApiKey(id: string, userId: string) {
+    await prisma.apiKey.update({
+      where: {
+        id,
+        userId,
+      },
+      data: {
+        disabled: false,
+      },
+    });
+  }
+
+  static async delete(userId: string, id: string) {
+    await prisma.apiKey.update({
+      where: {
+        userId,
+        id,
+      },
+      data: {
+        deleted: true,
+      },
+    });
   }
 }
