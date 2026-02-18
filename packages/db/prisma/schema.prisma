@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  password String
+  credits Int @default(1000)
+
+  apiKeys ApiKey[]
+  onrampTransactions OnrampTransaction[]
+  conversations Conversation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ApiKey {
+  id String @id @default(cuid())
+  name String
+  apiKey String @unique
+  disabled Boolean @default(false)
+  deleted Boolean @default(false)
+  lastUsed DateTime?
+  creditsConsumed Int @default(0)
+
+  userId String
+
+  user User @relation(fields: [userId], references: [id])
+  conversations Conversation[]
+}
+
+model Company {
+  id String @id @default(cuid())
+  name String
+  websiteUrl String
+  models Model[]
+}
+
+model Model {
+  id String @id @default(cuid())
+  name String
+  slug String
+  
+  companyId String
+  company Company @relation(fields: [companyId], references: [id])
+
+  modelProviderMappings ModelProviderMapping[]
+}
+
+model Provider {
+  id String @id @default(cuid())
+  name String
+  websiteUrl String
+
+  modelProviderMappings ModelProviderMapping[]
+}
+
+model ModelProviderMapping {
+  id String @id @default(cuid())
+  modelId String
+  providerId String
+  inputTokenCost Int
+  outputTokenCost Int
+  
+  model Model @relation(fields: [modelId], references: [id])
+  provider Provider @relation(fields: [providerId], references: [id])
+  conversations Conversation[]
+}
+
+model OnrampTransaction {
+  id String @id @default(cuid())
+  userId String
+  amount Int
+  status String
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Conversation {
+  id String @id @default(cuid())
+  userId String
+  apiKeyId String
+  modelProviderMappingId String
+  input String
+  output String
+  inputTokenCost Int
+  outputTokenCost Int
+  
+  user User @relation(fields: [userId], references: [id])
+  apiKey ApiKey @relation(fields: [apiKeyId], references: [id])
+  modelProviderMapping ModelProviderMapping @relation(fields: [modelProviderMappingId], references: [id])
+}
